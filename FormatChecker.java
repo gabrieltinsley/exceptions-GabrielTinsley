@@ -1,0 +1,5 @@
+class FormatChecker {
+    public FormatChecker() {
+        
+    }
+}
