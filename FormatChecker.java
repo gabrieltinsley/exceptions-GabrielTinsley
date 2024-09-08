@@ -1,9 +1,13 @@
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+
+
 
 class FormatChecker {
     private int[][] matrix;
+    private Scanner scnr = null;
 
     public FormatChecker(String filename) throws FileNotFoundException {
         matrix = readFile(filename);
@@ -11,7 +15,7 @@ class FormatChecker {
 
     private int[][] readFile(String filename) throws FileNotFoundException {
         File file = new File(filename);
-        Scanner scnr = new Scanner(file);
+        scnr = new Scanner(file);
 
         int rowSize = Integer.parseInt(scnr.next());
         int colSize = Integer.parseInt(scnr.nextLine().trim());
@@ -31,7 +35,24 @@ class FormatChecker {
     }
 
     public boolean isValid() {
+        //Scanner scan expects the next value to be an int
+    if ( ! scnr.hasNextInt() ) {
+	    try {
+            throw new InvalidFileFormatException( "missing expected integer" );
+        } catch (FormatChecker.InvalidFileFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
         return true;
+    }
+
+    /** Used when a file is found to be in the wrong format */
+    public class InvalidFileFormatException extends IOException {
+        /** Constructor */
+        public InvalidFileFormatException(String message) {
+            super(message); // pass through message to super
+        }
     }
 
     public int[][] getMatrix() {
