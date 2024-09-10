@@ -1,9 +1,8 @@
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-
 
 class FormatChecker {
     private int[][] matrix;
@@ -14,38 +13,55 @@ class FormatChecker {
     }
 
     private int[][] readFile(String filename) throws FileNotFoundException {
-        File file = new File(filename);
-        scnr = new Scanner(file);
+        try {
+            File file = new File(filename);
+            scnr = new Scanner(file);
 
-        int rowSize = Integer.parseInt(scnr.next());
-        int colSize = Integer.parseInt(scnr.nextLine().trim());
+            int rowSize = Integer.parseInt(scnr.next());
+            int colSize = Integer.parseInt(scnr.nextLine().trim());
 
-        int[][] mat = new int[rowSize][colSize];
+            int[][] mat = new int[rowSize][colSize];
 
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                if (scnr.hasNextInt()) {
-                    mat[row][col] = scnr.nextInt();
+            for (int row = 0; row < rowSize; row++) {
+                for (int col = 0; col < colSize; col++) {
+                    if (scnr.hasNextInt()) {
+                        mat[row][col] = scnr.nextInt();
+                    } else {
+                        throw new NoSuchElementException();
+                    }
+
                 }
             }
-        }
 
-        scnr.close();
-        return mat;
-    }
+            if(scnr.hasNextInt()) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
 
-    public boolean isValid() {
-        //Scanner scan expects the next value to be an int
-    if ( ! scnr.hasNextInt() ) {
-	    try {
-            throw new InvalidFileFormatException( "missing expected integer" );
-        } catch (FormatChecker.InvalidFileFormatException e) {
+            scnr.close();
+            return mat;
+            
+        } catch (NoSuchElementException e) {
             e.printStackTrace();
-        }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        } 
+
     }
 
-        return true;
-    }
+    /*
+     * public boolean isValid() {
+     * //Scanner scan expects the next value to be an int
+     * if ( ! scnr.hasNextInt() ) {
+     * try {
+     * throw new InvalidFileFormatException( "missing expected integer" );
+     * } catch (FormatChecker.InvalidFileFormatException e) {
+     * e.printStackTrace();
+     * }
+     * }
+     * 
+     * return true;
+     * }
+     */
 
     /** Used when a file is found to be in the wrong format */
     public class InvalidFileFormatException extends IOException {
