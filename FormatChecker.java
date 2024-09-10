@@ -1,84 +1,113 @@
-import java.util.NoSuchElementException;
+
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.NoSuchElementException;
+import java.util.InputMismatchException;
 
 class FormatChecker {
-    private int[][] matrix;
-    private Scanner scnr = null;
+    public static void main(String[] args) throws FileNotFoundException {
+        for (String filename : args) {
+            System.out.println(filename);
+            boolean isValid = readFile(filename);
 
-    public FormatChecker(String filename) throws FileNotFoundException {
-        matrix = readFile(filename);
+            if (isValid) {
+                System.out.println("VALID");
+            } else {
+                System.out.println("INVALID");
+            }
+            System.out.println();
+        }
+
     }
 
-    private int[][] readFile(String filename) throws FileNotFoundException {
+    private static boolean readFile(String filename) throws FileNotFoundException {
+        File file = new File(filename);
+
         try {
-            File file = new File(filename);
-            scnr = new Scanner(file);
+            if (!file.exists()) {
+                throw new FileNotFoundException(filename + " (The system cannot find the file specified)");
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println(e);
+            return false;
+        }
 
-            int rowSize = Integer.parseInt(scnr.next());
-            int colSize = Integer.parseInt(scnr.nextLine().trim());
+        Scanner scnr = new Scanner(file);
 
-            int[][] mat = new int[rowSize][colSize];
+        try {
+            
+            String firstLine = scnr.nextLine().trim();
+            Scanner firstLineScanner = new Scanner(firstLine);
+            if(! firstLineScanner.hasNextInt()) {
+                String val1 = firstLineScanner.next();
+                firstLineScanner.close();
+                throw new InputMismatchException("Number of rows needs to be an integer, this is not an integer: " + val1);
+            }
+            int rowSize = firstLineScanner.nextInt();
+            int colSize = 0;
+            if(firstLineScanner.hasNextInt()) {
+                colSize = firstLineScanner.nextInt();
+                if(firstLineScanner.hasNext()) {
+                    firstLineScanner.close();
+                    throw new InputMismatchException("Too many values for number of rows and columns, expected two");
+                }
+            } else if (firstLineScanner.hasNext()) {
+                String val2 = firstLineScanner.next();
+                firstLineScanner.close();
+                throw new InputMismatchException("Number of columns needs to be an integer, this is not an integer: " + val2);
+            } else {
+                firstLineScanner.close();
+                throw new InputMismatchException("Not enough values for number of rows and columns, expected two");
+            }
+            
+
+            firstLineScanner.close();
+            
 
             for (int row = 0; row < rowSize; row++) {
+                if(! scnr.hasNextLine()) {
+                    throw new IndexOutOfBoundsException("Not enough rows in matrix");
+                }
+                String line = scnr.nextLine();
+                Scanner lineScanner = new Scanner(line);
                 for (int col = 0; col < colSize; col++) {
-                    if (scnr.hasNextInt()) {
-                        mat[row][col] = scnr.nextInt();
+
+                    if (lineScanner.hasNextInt()) {
+                        lineScanner.nextInt();
+                    } else if (lineScanner.hasNextDouble()) {
+                        lineScanner.nextDouble();
+                    } else if (!lineScanner.hasNext()) {
+                        lineScanner.close();
+                        throw new NoSuchElementException("Not enough columns in row " + row);
                     } else {
-                        throw new NoSuchElementException();
+                        String nextVal = lineScanner.next();
+                        lineScanner.close();
+                        throw new NumberFormatException("For Input String: " + nextVal);
                     }
 
                 }
+                if (lineScanner.hasNext()) {
+                    lineScanner.close();
+                    throw new IndexOutOfBoundsException("Too many columns in row " + row);
+                }
+
+                lineScanner.close();
             }
 
-            if(scnr.hasNextInt()) {
-                throw new ArrayIndexOutOfBoundsException();
+            if(scnr.hasNextLine() && (! scnr.nextLine().trim().isEmpty())) {
+                throw new IndexOutOfBoundsException("Too many rows in matrix");
             }
 
+
+        } catch (NumberFormatException | IndexOutOfBoundsException | NoSuchElementException e) {
+            System.out.println(e);
             scnr.close();
-            return mat;
-            
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
-        } 
-
-    }
-
-    /*
-     * public boolean isValid() {
-     * //Scanner scan expects the next value to be an int
-     * if ( ! scnr.hasNextInt() ) {
-     * try {
-     * throw new InvalidFileFormatException( "missing expected integer" );
-     * } catch (FormatChecker.InvalidFileFormatException e) {
-     * e.printStackTrace();
-     * }
-     * }
-     * 
-     * return true;
-     * }
-     */
-
-    /** Used when a file is found to be in the wrong format */
-    public class InvalidFileFormatException extends IOException {
-        /** Constructor */
-        public InvalidFileFormatException(String message) {
-            super(message); // pass through message to super
+            return false;
+        } finally {
+            scnr.close();
         }
-    }
 
-    public int[][] getMatrix() {
-        return matrix;
-    }
-
-    @Override
-    public String toString() {
-        String str = "";
-
-        return str;
+        return true;
     }
 }
