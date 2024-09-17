@@ -17,13 +17,15 @@ class FormatChecker {
 
     /**
      * The main method that takes filenames as arguments, reads each file, and
-     * checks the matrix format
+     * checks the matrix format. Prints helpful usage message if no arguments are
+     * made.
      * 
      * @param args Array of filenames to check
      * @throws FileNotFoundException
      */
     public static void main(String[] args) throws FileNotFoundException {
         
+        // helpful usage message if no arguments are made
         if(args.length == 0) {
             System.out.println("Usage: $ java FormatChecker file1 [file2 ... fileN]");
         }
